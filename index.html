@@ -5,67 +5,229 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <title>VeriFact - WhatsApp Misinformation Guard</title>
-    <!-- Note: For production use, Tailwind should be compiled via CLI/PostCSS. 
-         Using the Play CDN here for demo compatibility. To suppress warning in Vercel/Netlify, 
-         one would normally integrate a build step. -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              whatsapp: {
-                DEFAULT: '#25D366',
-                dark: '#075E54',
-                light: '#DCF8C6',
-                teal: '#128C7E'
-              }
-            },
-            fontFamily: {
-              sans: ['Inter', 'system-ui', 'sans-serif'],
-            },
-          }
-        }
-      }
-    </script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
+      /* --- GLOBAL BASE --- */
+      :root {
+        --wa-teal: #128C7E;
+        --wa-dark: #075E54;
+        --wa-light: #DCF8C6;
+        --wa-green: #25D366;
+        --slate-50: #f8fafc;
+        --slate-100: #f1f5f9;
+        --slate-200: #e2e8f0;
+        --slate-300: #cbd5e1;
+        --slate-400: #94a3b8;
+        --slate-500: #64748b;
+        --slate-600: #475569;
+        --slate-700: #334155;
+        --slate-800: #1e293b;
+      }
+
+      * { box-sizing: border-box; }
       body {
+        margin: 0;
         background-color: #f0f2f5;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
         height: 100vh;
         overflow: hidden;
       }
+
+      /* --- LAYOUT UTILITIES --- */
+      .flex { display: flex; }
+      .flex-col { flex-direction: column; }
+      .flex-1 { flex: 1 1 0%; }
+      .shrink-0 { flex-shrink: 0; }
+      .items-center { align-items: center; }
+      .items-end { align-items: flex-end; }
+      .justify-center { justify-content: center; }
+      .justify-between { justify-content: space-between; }
+      .justify-end { justify-content: flex-end; }
+      .grid { display: grid; }
+      .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .gap-2 { gap: 0.5rem; }
+      .space-x-1 > * + * { margin-left: 0.25rem; }
+      .space-x-2 > * + * { margin-left: 0.5rem; }
+      .space-x-3 > * + * { margin-left: 0.75rem; }
+      .space-y-1 > * + * { margin-top: 0.25rem; }
+      .space-y-1\.5 > * + * { margin-top: 0.375rem; }
+      .space-y-2 > * + * { margin-top: 0.5rem; }
+      .space-y-3 > * + * { margin-top: 0.75rem; }
+      .space-y-4 > * + * { margin-top: 1rem; }
+
+      /* --- SIZING & SPACING --- */
+      .h-screen { height: 100vh; }
+      .h-full { height: 100%; }
+      .w-full { width: 100%; }
+      .w-12 { width: 3rem; }
+      .h-12 { height: 3rem; }
+      .w-16 { width: 4rem; }
+      .h-16 { height: 4rem; }
+      .max-w-2xl { max-width: 42rem; }
+      .max-w-\[85\%\] { max-width: 85%; }
+      .mx-auto { margin-left: auto; margin-right: auto; }
+      .p-1 { padding: 0.25rem; }
+      .p-1\.5 { padding: 0.375rem; }
+      .p-2 { padding: 0.5rem; }
+      .p-2\.5 { padding: 0.625rem; }
+      .p-3 { padding: 0.75rem; }
+      .p-4 { padding: 1rem; }
+      .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+      .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+      .px-4 { padding-left: 1rem; padding-right: 1rem; }
+      .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+      .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+      .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+      .pb-32 { padding-bottom: 8rem; }
+      .pt-1 { padding-top: 0.25rem; }
+
+      /* --- COLORS & BACKGROUNDS --- */
+      .bg-white { background-color: white; }
+      .bg-white\/20 { background-color: rgba(255,255,255,0.2); }
+      .bg-white\/50 { background-color: rgba(255,255,255,0.5); }
+      .bg-slate-50 { background-color: var(--slate-50); }
+      .bg-slate-100 { background-color: var(--slate-100); }
+      .bg-whatsapp-teal { background-color: var(--wa-teal); }
+      .bg-whatsapp-light { background-color: var(--wa-light); }
+      .bg-whatsapp-dark { background-color: var(--wa-dark); }
+      .bg-red-50 { background-color: #fef2f2; }
+      .bg-green-50 { background-color: #f0fdf4; }
+      .bg-lime-50 { background-color: #f7fee7; }
+      .bg-orange-50 { background-color: #fff7ed; }
+      .bg-transparent { background-color: transparent; }
+      .text-white { color: white; }
+      .text-slate-400 { color: var(--slate-400); }
+      .text-slate-500 { color: var(--slate-500); }
+      .text-slate-600 { color: var(--slate-600); }
+      .text-slate-700 { color: var(--slate-700); }
+      .text-slate-800 { color: var(--slate-800); }
+      .text-whatsapp-teal { color: var(--wa-teal); }
+      .text-whatsapp-light { color: var(--wa-light); }
+      .text-whatsapp-light\/80 { color: rgba(220, 248, 198, 0.8); }
+      .text-green-600 { color: #16a34a; }
+      .text-lime-600 { color: #65a30d; }
+      .text-orange-600 { color: #ea580c; }
+      .text-red-600 { color: #dc2626; }
+      .text-blue-500 { color: #3b82f6; }
+
+      /* --- DECORATION --- */
+      .rounded-lg { border-radius: 0.5rem; }
+      .rounded-xl { border-radius: 0.75rem; }
+      .rounded-2xl { border-radius: 1rem; }
+      .rounded-3xl { border-radius: 1.5rem; }
+      .rounded-full { border-radius: 9999px; }
+      .rounded-tr-none { border-top-right-radius: 0; }
+      .rounded-tl-none { border-top-left-radius: 0; }
+      .border { border: 1px solid var(--slate-200); }
+      .border-t { border-top: 1px solid var(--slate-200); }
+      .border-slate-100 { border-color: var(--slate-100); }
+      .border-slate-200 { border-color: var(--slate-200); }
+      .border-red-100 { border-color: #fee2e2; }
+      .border-green-100 { border-color: #dcfce7; }
+      .border-lime-100 { border-color: #ecfccb; }
+      .border-orange-100 { border-color: #ffedd5; }
+      .border-none { border: none; }
+      .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+      .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+      .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+      .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+
+      /* --- TYPOGRAPHY --- */
+      .text-xs { font-size: 0.75rem; }
+      .text-sm { font-size: 0.875rem; }
+      .text-lg { font-size: 1.125rem; }
+      .text-\[10px\] { font-size: 10px; }
+      .text-\[8px\] { font-size: 8px; }
+      .font-bold { font-weight: 700; }
+      .font-medium { font-weight: 500; }
+      .font-semibold { font-weight: 600; }
+      .font-black { font-weight: 900; }
+      .uppercase { text-transform: uppercase; }
+      .tracking-wider { letter-spacing: 0.05em; }
+      .tracking-widest { letter-spacing: 0.1em; }
+      .italic { font-style: italic; }
+      .leading-tight { line-height: 1.25; }
+      .leading-snug { line-height: 1.375; }
+      .leading-relaxed { line-height: 1.625; }
+      .text-center { text-align: center; }
+      .text-right { text-align: right; }
+      .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .whitespace-pre-wrap { white-space: pre-wrap; }
+
+      /* --- INTERACTIVE --- */
+      .absolute { position: absolute; }
+      .relative { position: relative; }
+      .bottom-0 { bottom: 0; }
+      .left-0 { left: 0; }
+      .right-0 { right: 0; }
+      .z-10 { z-index: 10; }
+      .z-20 { z-index: 20; }
+      .overflow-hidden { overflow: hidden; }
+      .overflow-y-auto { overflow-y: auto; }
+      .hidden { display: none; }
+      .resize-none { resize: none; }
+      .focus-within\:border-whatsapp-teal:focus-within { border-color: var(--wa-teal); }
+      .hover\:bg-white\/10:hover { background-color: rgba(255,255,255,0.1); }
+      .hover\:bg-slate-200:hover { background-color: var(--slate-200); }
+      .hover\:text-whatsapp-teal:hover { color: var(--wa-teal); }
+      .hover\:border-whatsapp-teal:hover { border-color: var(--wa-teal); }
+      .transition-all { transition: all 0.2s; }
+      .transition-colors { transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
+      .duration-300 { animation-duration: 300ms; }
+      .animate-spin { animation: spin 1s linear infinite; }
+      .animate-bounce { animation: bounce 1s infinite; }
+      .animate-in { animation-fill-mode: both; }
+
+      /* --- CUSTOM CHAT ELEMENTS --- */
       .chat-bg {
         background-color: #e5ddd5;
         background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
         background-blend-mode: overlay;
       }
-      /* Custom scrollbar */
-      ::-webkit-scrollbar {
-        width: 6px;
+
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      @keyframes bounce { 
+        0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+        50% { transform: translateY(0); animation-timing-function: cubic-bezier(0,0,0.2,1); }
       }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-      }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes slideInUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+      @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+      .slide-in-from-bottom-2 { animation: slideInUp 0.3s ease-out; }
+      .fade-in { animation: fadeIn 0.2s ease-out; }
+      .zoom-in { animation: zoomIn 0.2s ease-out; }
+
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+      textarea:focus { outline: none; }
+      button { cursor: pointer; border: none; font: inherit; background: none; }
+      button:disabled { cursor: not-allowed; opacity: 0.6; }
+      a { text-decoration: none; }
+      img { max-width: 100%; display: block; }
+
+      .\[animation-delay\:-0\.3s\] { animation-delay: -0.3s; }
+      .\[animation-delay\:-0\.15s\] { animation-delay: -0.15s; }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
-  }
-}
-</script>
-</head>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+      }
+    }
+    </script>
+  </head>
   <body>
     <div id="root"></div>
   </body>
