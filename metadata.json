@@ -1,0 +1,7 @@
+{
+  "name": "VeriFact: WhatsApp Misinformation Guard",
+  "description": "Stop the spread of fake news. Forward suspicious WhatsApp messages or upload screenshots for instant AI fact-checking powered by Gemini and Google Search.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
