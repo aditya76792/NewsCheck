@@ -6,7 +6,7 @@ export async function verifyContent(
   text: string, 
   imageUri?: string
 ): Promise<VerificationResult> {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const ai = new GoogleGenAI({ apiKey: 'AIzaSyDkSB_tpv5ikGvyYBOEUAMTCsqgyxs7EJs' || '' });
   const model = 'gemini-3-flash-preview';
   
   const systemInstruction = `
